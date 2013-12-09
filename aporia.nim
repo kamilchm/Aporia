@@ -1,7 +1,7 @@
 #
 #
 #            Aporia - Nimrod IDE
-#        (c) Copyright 2011 Dominik Picheta
+#        (c) Copyright 2013 Dominik Picheta
 #
 #    See the file "copying.txt", included in this
 #    distribution, for details about the copyright.
@@ -17,7 +17,7 @@ import settings, utils, cfg, search, suggest, AboutDialog, processes,
 {.push callConv:cdecl.}
 
 const
-  GTKVerReq = (2'i32, 18'i32, 0'i32) # Version of GTK required for Aporia to run.
+  GTKVerReq = (2'i32, 24'i32, 0'i32) # Version of GTK required for Aporia to run.
   aporiaVersion = "0.1.3"
   helpText = """./aporia [args] filename...
   -v  --version  Reports aporia's version
@@ -39,7 +39,7 @@ proc writeHelp() =
   quit(QuitSuccess)
 
 proc writeVersion() =
-  echo("Aporia v$1 compiled at $2 $3.\nCopyright (c) Dominik Picheta 2010-2012" % 
+  echo("Aporia v$1 compiled at $2 $3.\nCopyright (c) Dominik Picheta 2010-2013" % 
        [aporiaVersion, compileDate, compileTime])
   quit(QuitSuccess)
 
@@ -1920,7 +1920,7 @@ proc initSourceViewTabs() =
       var (filename, offset) = (splitUp[0], splitUp[1])
       if existsFile(filename):
         let newTab = addTab("", filename, win.autoSettings.lastSelectedTab == filename)
-        
+        if newTab == -1: continue # Error adding tab, ``addTab`` will update the status bar with more info        
         var iter: TTextIter
         # TODO: Save last cursor position as line and column offset combo.
         # This will help with int overflows which would happen more often with
@@ -2302,7 +2302,7 @@ proc checkAlreadyRunning(): bool =
   result = false
   var client = socket()
   try:
-    client.connect("localhost", TPort(win.globalSettings.singleInstancePort.toU16))
+    client.connect("localhost", TPort(win.globalSettings.singleInstancePort))
   except EOS:
     return false
   echo("An instance of aporia is already running.")
